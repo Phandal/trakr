@@ -36,6 +36,6 @@ trakr --delete <session-id>
 Session files are stored in `TRAKR_DIR` or `~/.trakr` by default.
 
 ## Todo
-- [] Parse the cli arguments - (use `getopt_long`) and refactor [usage](#usage) to use subcommands.
-- [] Create a parser for a session
-- [] Work out saving the session data to a day file
+- [ ] Parse the cli arguments - (use `getopt_long`) and refactor [usage](#usage) to use subcommands.
+- [ ] Create a parser for a session
+- [ ] Work out saving the session data to a day file
