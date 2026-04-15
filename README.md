@@ -13,27 +13,32 @@ cmake --install build
 
 ## Usage
 ```bash
+# Show usage message
+trakr help
+
 # Clock in to a session with task name
-trakr --in <task-name>
+trakr in --task [task-name]
 
 # Clock out of the currently active task
-trakr --out
+trakr out
 
 # Report time clocked today grouped by task
-trakr --report
+trakr report
 
 # Report time clocked on a specific day grouped by task
-trakr --report <yyyy-mm-dd>
+trakr report --day [yyyy-mm-dd]
 
 # Update a session
-trakr --update <session-id> --start <hh:mm> --end <hh:mm> --task <task-name>
+trakr update --id [session-id] --start [hh:mm] --end [hh:mm] --task [task-name]
 
 # Delete a session
-trakr --delete <session-id>
+trakr delete  --id [session-id]
 ```
 
 ## Configuration
-Session files are stored in `TRAKR_DIR` or `~/.trakr` by default.
+Sessions are stored in a file with the current date as the name. Files are just text and can be
+easily read and modified by a human. Session files are stored in `TRAKR_DIR` or `~/.trakr` by
+default.
 
 ## Todo
 - [ ] Parse the cli arguments - (use `getopt_long`) and refactor [usage](#usage) to use subcommands.

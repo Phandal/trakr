@@ -3,59 +3,43 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define TASK_NAME_SIZE 100
+#include "command.h"
 
 void usage() {
-  fprintf(stderr, "Usage: trakr [OPTIONS]\n");
-  fprintf(stderr, "\nTODO\n");
+  fprintf(stderr, "usage:\n  trakr [command] [options]\n\n");
+  fprintf(stderr, "COMMANDS\n");
+  fprintf(stderr, "  %-15sClock in to a session\n", "in");
+  fprintf(stderr, "  %-15sClock out of the current session\n", "out");
+  fprintf(stderr, "  %-15sReport time logged\n", "report");
+  fprintf(stderr, "  %-15sUpdate a session\n", "update");
+  fprintf(stderr, "  %-15sDelete a session\n", "delete");
 }
 
 int main(int argc, char **argv) {
-  int incmd = 0;
-  int outcmd = 0;
-  int ch = 0;
-  char task[TASK_NAME_SIZE] = {0};
-
-  struct option longopts[] = {
-    {"in", required_argument, NULL, 'i'},
-    {"out", no_argument, NULL, 'o'},
-    {0, 0, 0, 0},
-  };
+  int ch;
+  int res;
+  char *command;
 
   if (argc == 1) {
     usage();
     exit(EXIT_FAILURE);
   }
+  command = argv[1];
+  argc--;
+  argv++;
 
-  while ((ch = getopt_long(argc, argv, "+bf:", longopts, NULL)) != -1) {
-    switch (ch) {
-    case 'i':
-      incmd = 1;
-      strncpy(task, optarg, TASK_NAME_SIZE - 1);
-      task[TASK_NAME_SIZE - 1] = '\0';
-      break;
-    case 'o':
-      outcmd = 1;
-      break;
-    default:
-      usage();
-      exit(EXIT_FAILURE);
-    }
-  }
-  argc -= optind;
-  argv += optind;
-
-  if ((incmd + outcmd) > 1) {
-    fprintf(stderr, "'--in' and '--out' are mutually exclusive options\n");
+  if (cmd_is_help(command)) {
     usage();
-    exit(EXIT_FAILURE);
+    res = 0;
+  } else if (strcmp(command, "in") == 0) {
+    res = cmd_clock_in(argc, argv);
+  } else if (strcmp(command, "out") == 0) {
+    res = cmd_clock_out(argc, argv);
+  } else {
+    fprintf(stderr, "trakr: unknown command '%s'\n", command);
+    usage();
+    res = 1;
   }
 
-  if (incmd) {
-    fprintf(stderr, "Incmd\nTask: %s\n", task);
-  } else if (outcmd) {
-    fprintf(stderr, "Outcmd\n");
-  }
-
-  return EXIT_SUCCESS;
+  return res;
 }
