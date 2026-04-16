@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "session.h"
 #include "trakr.h"
 
 int cmd_is_help(const char *command) {
@@ -45,8 +46,17 @@ int cmd_clock_in(int argc, char **argv) {
       return 1;
     }
   }
+  argc -= optind;
+  argv += optind;
 
-  printf("Clocked in to session\n  - %s\n", task);
+  session_t *session = session_new(task);
+  if (session == NULL) {
+    fprintf(stderr, "trakr: could not create new session\n");
+    return 1;
+  }
+
+  printf("Clocked in at %s\n", session_time(session->start));
+  printf("  - %d | %s\n", session->id, session->task);
 
   return 1;
 }

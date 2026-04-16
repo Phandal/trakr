@@ -6,7 +6,7 @@
 #include "command.h"
 
 void usage() {
-  fprintf(stderr, "usage:\n  trakr [command] [options]\n\n");
+  fprintf(stderr, "USAGE:\n  trakr <command> [<options>]\n\n");
   fprintf(stderr, "COMMANDS\n");
   fprintf(stderr, "  %-15sClock in to a session\n", "in");
   fprintf(stderr, "  %-15sClock out of the current session\n", "out");
