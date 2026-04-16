@@ -25,11 +25,7 @@ int cmd_is_help(const char *command) {
 
 int cmd_clock_in(int argc, char **argv) {
   int ch;
-  char task[TRAKR_TASK_LENGTH];
-  if (argc == 1) {
-    fprintf(stderr, "trakr: clock in requires a task name\n");
-    return 1;
-  }
+  char task[TRAKR_TASK_LENGTH] = {0};
 
   struct option longopts[] = {
       {"task", required_argument, NULL, 't'},
@@ -49,15 +45,21 @@ int cmd_clock_in(int argc, char **argv) {
   argc -= optind;
   argv += optind;
 
+  if (argc == 1 || task[0] == '\0') {
+    fprintf(stderr, "trakr: clock in requires a task name\n");
+    return 1;
+  }
+
   session_t *session = session_new(task);
   if (session == NULL) {
     fprintf(stderr, "trakr: could not create new session\n");
     return 1;
   }
 
-  printf("Clocked in at %s\n", session_time(session->start));
+  printf("Clocked in at %s\n", session_time(&session->start));
   printf("  - %d | %s\n", session->id, session->task);
 
+  session_free(session);
   return 1;
 }
 

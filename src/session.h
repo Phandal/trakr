@@ -15,6 +15,8 @@ typedef struct {
 
 session_t *session_new(const char *);
 
-char *session_time(time_t);
+char *session_time(time_t *);
+
+void session_free(session_t *);
 
 #endif // SESSION_H
