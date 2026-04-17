@@ -17,22 +17,19 @@ cmake --install build
 trakr help
 
 # Clock in to a session with task name
-trakr in --task [task-name]
+trakr in --task <task-name> [--at <hh:mm>]
 
 # Clock out of the currently active task
-trakr out
+trakr out [--at <hh:mm>]
 
-# Report time clocked today grouped by task
-trakr report
-
-# Report time clocked on a specific day grouped by task
-trakr report --day [yyyy-mm-dd]
+# Report time clocked grouped by task
+trakr report [--day <yyyy-mm-dd>]
 
 # Update a session
-trakr update --id [session-id] --start [hh:mm] --end [hh:mm] --task [task-name]
+trakr update --id <session-id> [--start <hh:mm>] [--end <hh:mm>] [--task <task-name>]
 
 # Delete a session
-trakr delete  --id [session-id]
+trakr delete  --id <session-id>
 ```
 
 ## Configuration
