@@ -8,6 +8,25 @@
 #include <string.h>
 #include <time.h>
 
+char *_session_current_file_name(const config_t *config) {
+  char *current_filename = "current";
+  char day_dir[9] = {0};
+
+  time_t tm = time(NULL);
+  struct tm *timeptr = localtime(&tm);
+
+  strftime(day_dir, 9, "%m%d%Y", timeptr);
+
+  size_t size = strlen(config->directory) + strlen(day_dir) +
+                strlen(current_filename) + 3;
+
+  char *path = malloc(sizeof(char) * size);
+  snprintf(path, size, "%s/%s/%s", config->directory, day_dir,
+           current_filename);
+  printf("current path: %s\n", path);
+  return path;
+}
+
 session_t *session_new(const char *task, const time_t start, const time_t end) {
   session_t *session = (session_t *)malloc(sizeof(session_t));
   if (!session) {
@@ -79,7 +98,7 @@ session_t *session_parse(const char *s) {
     return NULL;
   }
 
-  if (strnlen(end, TRAKR_TIME_LENGTH) == 0) {
+  if (strncmp(end, "null", TRAKR_TIME_LENGTH) == 0) {
     end_time = -1;
   } else {
     if ((end_time = session_new_time(end)) == -1) {
@@ -116,3 +135,25 @@ void session_free(session_t *session) {
   free(session);
   session = NULL;
 }
+
+session_t *session_is_currently_active(const config_t *config) {
+  char session_buf[TRAKR_SESSION_LENGTH] = {0};
+  char *filepath = _session_current_file_name(config);
+
+  FILE *fd = fopen(filepath, "r");
+  if (fd == NULL) {
+    perror("fopen");
+    return NULL;
+  }
+
+  fgets(session_buf, TRAKR_SESSION_LENGTH, fd);
+  fclose(fd);
+  free(filepath);
+
+  if (session_buf[0] == '\0') {
+    return NULL;
+  }
+
+  return session_parse(session_buf);
+}
+

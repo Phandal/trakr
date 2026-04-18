@@ -3,6 +3,7 @@
 
 #include <time.h>
 
+#include "config.h"
 #include "trakr.h"
 
 typedef struct {
@@ -24,5 +25,7 @@ session_t *session_parse(const char *);
 int session_str(session_t *, char *);
 
 void session_free(session_t *);
+
+session_t *session_is_currently_active(const config_t *);
 
 #endif // SESSION_H

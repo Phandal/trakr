@@ -23,7 +23,7 @@ int cmd_is_help(const char *command) {
   return 0;
 }
 
-int cmd_clock_in(int argc, char **argv, config_t *_config) {
+int cmd_clock_in(int argc, char **argv, config_t *config) {
   int ch;
   char task[TRAKR_TASK_LENGTH] = {0};
   time_t start = -1;
@@ -59,6 +59,11 @@ int cmd_clock_in(int argc, char **argv, config_t *_config) {
     return 1;
   }
 
+  if (session_is_currently_active(config)) {
+    trakr_log("cannot clock into a new session when a session is already active\n");
+    return 1;
+  }
+
   session_t *session = session_new(task, start, -1);
   if (session == NULL) {
     trakr_log("could not create new session\n");
@@ -78,7 +83,7 @@ int cmd_clock_in(int argc, char **argv, config_t *_config) {
   return 0;
 }
 
-int cmd_clock_out(int argc, char **argv, config_t *_config) {
+int cmd_clock_out(int argc, char **argv, config_t *config) {
   int ch;
   time_t end_time = -1;
 
@@ -102,6 +107,11 @@ int cmd_clock_out(int argc, char **argv, config_t *_config) {
   }
   argc -= optind;
   argv += optind;
+
+  if (session_is_currently_active(config) == NULL) {
+    trakr_log("cannot clock out of session when none are active\n");
+    return 1;
+  }
 
   // TODO remove this when clocking out actual current task
   if (end_time == -1) {

@@ -29,21 +29,26 @@ int main(int argc, char **argv) {
   argc--;
   argv++;
 
-  config_t config = config_new();
-  printf("using config dir: %s\n", config.directory);
+  config_t *config = config_new();
+  if (!config) {
+    trakr_log("could not create config\n");
+    return 1;
+  }
+  printf("using config dir: %s\n", config->directory);
 
   if (cmd_is_help(command)) {
     usage();
     res = 0;
   } else if (strcmp(command, "in") == 0) {
-    res = cmd_clock_in(argc, argv, &config);
+    res = cmd_clock_in(argc, argv, config);
   } else if (strcmp(command, "out") == 0) {
-    res = cmd_clock_out(argc, argv, &config);
+    res = cmd_clock_out(argc, argv, config);
   } else {
-    trakr_log("trakr: unknown command '%s'\n", command);
+    trakr_log("unknown command '%s'\n", command);
     usage();
     res = 1;
   }
 
+  config_free(config);
   return res;
 }
