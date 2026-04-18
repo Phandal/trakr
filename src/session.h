@@ -17,7 +17,11 @@ session_t *session_new(const char *, const time_t, const time_t);
 
 time_t session_new_time(const char *);
 
-char *session_strtime(const time_t);
+int session_strtime(const time_t, char *);
+
+session_t *session_parse(const char *);
+
+int session_str(session_t *, char *);
 
 void session_free(session_t *);
 

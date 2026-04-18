@@ -18,7 +18,6 @@ void usage() {
 }
 
 int main(int argc, char **argv) {
-  int ch;
   int res;
   char *command;
 

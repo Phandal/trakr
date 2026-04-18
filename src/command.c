@@ -65,16 +65,22 @@ int cmd_clock_in(int argc, char **argv, config_t *_config) {
     return 1;
   }
 
-  printf("Clocked in at %s\n", session_strtime(session->start));
-  printf("  - %d | %s\n", session->id, session->task);
+  /* printf("Clocked in at %s\n", session_strtime(session->start)); */
+  /* printf("  - %d | %s\n", session->id, session->task); */
+  char session_buf[TRAKR_SESSION_LENGTH] = {0};
+  if (session_str(session, session_buf) == -1) {
+    trakr_log("could not print session\n");
+  }
 
+  printf("Created new session: %s\n", session_buf);
+  
   session_free(session);
   return 0;
 }
 
 int cmd_clock_out(int argc, char **argv, config_t *_config) {
   int ch;
-  time_t end = -1;
+  time_t end_time = -1;
 
   struct option longopts[] = {
       {"at", required_argument, NULL, 'a'},
@@ -84,7 +90,7 @@ int cmd_clock_out(int argc, char **argv, config_t *_config) {
   while ((ch = getopt_long(argc, argv, "+a:", longopts, NULL)) != -1) {
     switch (ch) {
     case 'a':
-      if ((end = session_new_time(optarg)) == -1) {
+      if ((end_time = session_new_time(optarg)) == -1) {
         trakr_log("unable to parse time '%s'\n", optarg);
         return 1;
       }
@@ -98,10 +104,12 @@ int cmd_clock_out(int argc, char **argv, config_t *_config) {
   argv += optind;
 
   // TODO remove this when clocking out actual current task
-  if (end == -1) {
-    end = time(NULL);
+  if (end_time == -1) {
+    end_time = time(NULL);
   }
 
-  printf("Clocked out at %s\n", session_strtime(end));
+  char end[TRAKR_TIME_LENGTH] = {0};
+  session_strtime(end_time, end);
+  printf("Clocked out at %s\n", end);
   return 0;
 }
