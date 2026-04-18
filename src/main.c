@@ -4,15 +4,17 @@
 #include <string.h>
 
 #include "command.h"
+#include "config.h"
+#include "trakr.h"
 
 void usage() {
-  fprintf(stderr, "USAGE:\n  trakr <command> [<options>]\n\n");
-  fprintf(stderr, "COMMANDS\n");
-  fprintf(stderr, "  %-15sClock in to a session\n", "in");
-  fprintf(stderr, "  %-15sClock out of the current session\n", "out");
-  fprintf(stderr, "  %-15sReport time logged\n", "report");
-  fprintf(stderr, "  %-15sUpdate a session\n", "update");
-  fprintf(stderr, "  %-15sDelete a session\n", "delete");
+  trakr_log("USAGE:\n  trakr <command> [<options>]\n\n");
+  trakr_log("COMMANDS\n");
+  trakr_log("  %-15sClock in to a session\n", "in");
+  trakr_log("  %-15sClock out of the current session\n", "out");
+  trakr_log("  %-15sReport time logged\n", "report");
+  trakr_log("  %-15sUpdate a session\n", "update");
+  trakr_log("  %-15sDelete a session\n", "delete");
 }
 
 int main(int argc, char **argv) {
@@ -28,15 +30,18 @@ int main(int argc, char **argv) {
   argc--;
   argv++;
 
+  config_t config = config_new();
+  printf("using config dir: %s\n", config.directory);
+
   if (cmd_is_help(command)) {
     usage();
     res = 0;
   } else if (strcmp(command, "in") == 0) {
-    res = cmd_clock_in(argc, argv);
+    res = cmd_clock_in(argc, argv, &config);
   } else if (strcmp(command, "out") == 0) {
-    res = cmd_clock_out(argc, argv);
+    res = cmd_clock_out(argc, argv, &config);
   } else {
-    fprintf(stderr, "trakr: unknown command '%s'\n", command);
+    trakr_log("trakr: unknown command '%s'\n", command);
     usage();
     res = 1;
   }

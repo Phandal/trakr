@@ -8,6 +8,8 @@ add_executable(trakr
   src/main.c
   src/command.c
   src/session.c
+  src/config.c
+  src/trakr.c
 )
 target_include_directories(trakr PUBLIC src)
 
