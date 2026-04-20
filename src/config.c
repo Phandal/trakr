@@ -5,29 +5,44 @@
 #include <stdlib.h>
 #include <string.h>
 
-config_t *config_new() {
-  char *user_defined_dir = NULL;
-  config_t *config = (config_t *)malloc(sizeof(config_t));
-  if (!config) {
+static char *_expand_home(const char *dir) {
+  if (!dir) {
     return NULL;
   }
-  config->directory = strdup(TRAKR_DIR);
 
-  if ((user_defined_dir = getenv("TRAKR_DIR")) != NULL) {
-    config->directory = user_defined_dir;
-  }
-
-  if (config->directory[0] == '~' && config->directory[1] == '/') {
-    config->directory += 2;
+  if (dir[0] == '~') {
     char *home = getenv("HOME");
-    if (home == NULL) {
+    if (!home) {
       return NULL;
     }
 
-    size_t size = strlen(config->directory) + strlen(home) + 2;
-    char *fullpath = malloc(sizeof(char) * size);
-    snprintf(fullpath, size, "%s/%s", home, config->directory);
-    config->directory = fullpath;
+    size_t size = strlen(home) + strlen(dir + 2) + 2;
+    char *full = malloc(size);
+    if (snprintf(full, size, "%s/%s", home, dir) < 0) {
+      return NULL;
+    }
+
+    return full;
+  }
+
+  return strdup(dir);
+}
+
+config_t *config_new(void) {
+  config_t *config = malloc(sizeof(config_t));
+  if (!config) {
+    return NULL;
+  }
+
+  const char *dir = getenv("TRAKR_DIR");
+  if (!dir) {
+    dir = TRAKR_DIR;
+  }
+
+  config->directory = _expand_home(dir);
+  if (!config->directory) {
+    free(config);
+    return NULL;
   }
 
   return config;
