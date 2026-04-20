@@ -1,15 +1,43 @@
 #ifndef TRAKR_H
 #define TRAKR_H
 
-#define TRAKR_TIME_LENGTH 6
+#define _XOPEN_SOURCE 700
+
+#define TRAKR_ID_LENGTH 5
+
+#define TRAKR_TIME_LENGTH 16
 
 #define TRAKR_TASK_LENGTH 512
 
-// Note the extra 7 is for ' | ' twice  and the ending '\0'
-#define TRAKR_SESSION_LENGTH (TRAKR_TIME_LENGTH + TRAKR_TIME_LENGTH + TRAKR_TASK_LENGTH + 7)
+#define TRAKR_HEADER_LENGTH                                                    \
+  (TRAKR_ID_LENGTH + 1 + TRAKR_TIME_LENGTH + 1 + TRAKR_TIME_LENGTH)
 
-#define TRAKR_DIR "~/.trakr"
+#define TRAKR_SESSION_LENGTH (TRAKR_HEADER_LENGTH + 1 + TRAKR_TASK_LENGTH)
+
+#define TRAKR_FILE "~/.trakr"
+
+#include <stdint.h>
+#include <time.h>
+
+#include "config.h"
+
+typedef struct {
+  uint16_t id;
+  time_t start;
+  time_t end;
+  char task[TRAKR_TASK_LENGTH];
+} trakr_session_t;
+
+typedef struct {
+  size_t count;
+  size_t cap;
+  trakr_session_t *sessions;
+} trakr_t;
 
 void trakr_log(const char *, ...);
+
+trakr_t *trakr_load(config_t *);
+
+void trakr_free(trakr_t *);
 
 #endif // TRAKR_H

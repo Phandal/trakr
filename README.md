@@ -33,15 +33,19 @@ trakr delete  --id <session-id>
 ```
 
 ## Configuration
-Session are saved as plain text and can be easily read and modified by a human. Session files are
-stored in `TRAKR_DIR` or `~/.trakr` by default.
+Sessions are saved as plain text and can be easily read and modified by a human. The session file
+is stored in `TRAKR_FILE` or `~/.trakr` by default.
 
 ## Example task file
+Each session is stored on a single line. If two sessions have the same task, it is interpreted as
+two sessions logged for the same task (see 1 & 3 below).
+
 ```sh
 1    |2026-04-19 08:15|2026-04-19 13:30|My custom task
 2    |2026-04-19 13:30|2026-04-19 16:45|Another task
+3    |2026-04-19 16:45|2026-04-19 17:00|My custom task
 ...
-12532|2026-05-20 12:00|                |A task this is not complete yet
+12532|2026-05-20 12:00|                |A task that is not complete yet
 ```
 
 ## Todo

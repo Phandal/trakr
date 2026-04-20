@@ -8,13 +8,13 @@
 #include "trakr.h"
 
 void usage() {
-  trakr_log("USAGE:\n  trakr <command> [<options>]\n\n");
-  trakr_log("COMMANDS\n");
-  trakr_log("  %-15sClock in to a session\n", "in");
-  trakr_log("  %-15sClock out of the current session\n", "out");
-  trakr_log("  %-15sReport time logged\n", "report");
-  trakr_log("  %-15sUpdate a session\n", "update");
-  trakr_log("  %-15sDelete a session\n", "delete");
+  fprintf(stderr, "USAGE:\n  trakr <command> [<options>]\n\n");
+  fprintf(stderr, "COMMANDS\n");
+  fprintf(stderr, "  %-15sClock in to a session\n", "in");
+  fprintf(stderr, "  %-15sClock out of the current session\n", "out");
+  fprintf(stderr, "  %-15sReport time logged\n", "report");
+  fprintf(stderr, "  %-15sUpdate a session\n", "update");
+  fprintf(stderr, "  %-15sDelete a session\n", "delete");
 }
 
 int main(int argc, char **argv) {
@@ -34,21 +34,33 @@ int main(int argc, char **argv) {
     trakr_log("could not create config\n");
     return 1;
   }
-  printf("using config dir: %s\n", config->directory);
 
-  if (cmd_is_help(command)) {
-    usage();
-    res = 0;
-  } else if (strcmp(command, "in") == 0) {
-    res = cmd_clock_in(argc, argv, config);
-  } else if (strcmp(command, "out") == 0) {
-    res = cmd_clock_out(argc, argv, config);
-  } else {
-    trakr_log("unknown command '%s'\n", command);
-    usage();
-    res = 1;
+  trakr_t *app = trakr_load(config);
+  if (!app) {
+    trakr_log("corrupted data file\n");
+    return 1;
   }
 
+  printf("parsed %lu sessions\n", app->count);
+  for (unsigned int x = 0; x < app->count; ++x) {
+    const trakr_session_t *session = &app->sessions[x];
+    printf("id: %-5d task: %s\n", session->id, session->task);
+  }
+
+  /* if (cmd_is_help(command)) { */
+  /*   usage(); */
+  /*   res = 0; */
+  /* } else if (strcmp(command, "in") == 0) { */
+  /*   res = cmd_clock_in(argc, argv, config); */
+  /* } else if (strcmp(command, "out") == 0) { */
+  /*   res = cmd_clock_out(argc, argv, config); */
+  /* } else { */
+  /*   trakr_log("unknown command '%s'\n", command); */
+  /*   usage(); */
+  /*   res = 1; */
+  /* } */
+
   config_free(config);
+  trakr_free(app);
   return res;
 }

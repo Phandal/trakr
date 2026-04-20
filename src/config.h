@@ -2,7 +2,7 @@
 #define CONFIG_H
 
 typedef struct {
-  char *directory;
+  char *data_path;
 } config_t;
 
 config_t *config_new(void);

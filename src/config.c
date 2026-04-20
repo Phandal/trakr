@@ -5,27 +5,27 @@
 #include <stdlib.h>
 #include <string.h>
 
-static char *_expand_home(const char *dir) {
-  if (!dir) {
+static char *_expand_home(const char *path) {
+  if (!path) {
     return NULL;
   }
 
-  if (dir[0] == '~') {
+  if (path[0] == '~') {
     char *home = getenv("HOME");
     if (!home) {
       return NULL;
     }
 
-    size_t size = strlen(home) + strlen(dir + 2) + 2;
+    size_t size = strlen(home) + strlen(path + 1) + 2;
     char *full = malloc(size);
-    if (snprintf(full, size, "%s/%s", home, dir) < 0) {
+    if (snprintf(full, size, "%s/%s", home, path + 1) < 0) {
       return NULL;
     }
 
     return full;
   }
 
-  return strdup(dir);
+  return strdup(path);
 }
 
 config_t *config_new(void) {
@@ -34,13 +34,13 @@ config_t *config_new(void) {
     return NULL;
   }
 
-  const char *dir = getenv("TRAKR_DIR");
-  if (!dir) {
-    dir = TRAKR_DIR;
+  const char *path = getenv("TRAKR_FILE");
+  if (!path) {
+    path = TRAKR_FILE;
   }
 
-  config->directory = _expand_home(dir);
-  if (!config->directory) {
+  config->data_path = _expand_home(path);
+  if (!config->data_path) {
     free(config);
     return NULL;
   }
@@ -53,7 +53,7 @@ void config_free(config_t *config) {
     return;
   }
 
-  free(config->directory);
+  free(config->data_path);
   free(config);
   config = NULL;
 }
