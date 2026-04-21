@@ -5,7 +5,7 @@
 #include <string.h>
 
 void trakr_log(const char *fmt, ...) {
-  fprintf(stderr, "[trakr]: ");
+  fprintf(stderr, "trakr: ");
   va_list list;
 
   va_start(list, fmt);
@@ -32,7 +32,7 @@ static size_t trakr_push_session(trakr_t *trakr,
   return trakr->count;
 }
 
-static time_t trakr_session_parse_time(const char *buf) {
+time_t trakr_session_parse_date(const char *buf) {
   time_t current = time(NULL);
   struct tm *tm = localtime(&current);
   tm->tm_sec = 0;
@@ -42,6 +42,32 @@ static time_t trakr_session_parse_time(const char *buf) {
   }
 
   return mktime(tm);
+}
+
+time_t trakr_session_parse_time(const char *buf) {
+  time_t current = time(NULL);
+  struct tm *tm = localtime(&current);
+  tm->tm_sec = 0;
+
+  if (strptime(buf, "%H:%M", tm) == NULL) {
+    return -1;
+  }
+
+  return mktime(tm);
+}
+
+int trakr_session_strtime(char *buf, size_t n, time_t time) {
+  int rs;
+  struct tm *timeptr = localtime(&time);
+  if (!timeptr) {
+    return 1;
+  }
+
+  if ((rs = strftime(buf, n, "%H:%M", timeptr)) == 0) {
+    return 1;
+  }
+
+  return rs;
 }
 
 static trakr_session_t *trakr_session_parse(const char *line) {
@@ -65,7 +91,7 @@ static trakr_session_t *trakr_session_parse(const char *line) {
   // START
   memmove(buf, line + offset, TRAKR_TIME_LENGTH);
   buf[TRAKR_TIME_LENGTH] = '\0';
-  session->start = trakr_session_parse_time(buf);
+  session->start = trakr_session_parse_date(buf);
   if (session->start == -1) {
     return NULL;
   }
@@ -77,7 +103,7 @@ static trakr_session_t *trakr_session_parse(const char *line) {
   if (strncmp(buf, "                ", TRAKR_TIME_LENGTH) == 0) {
     session->end = -1;
   } else {
-    session->end = trakr_session_parse_time(buf);
+    session->end = trakr_session_parse_date(buf);
     if (session->end == -1) {
       return NULL;
     }
@@ -94,7 +120,7 @@ static trakr_session_t *trakr_session_parse(const char *line) {
   return session;
 }
 
-trakr_t *trakr_load(config_t *config) {
+trakr_t *trakr_load(const config_t *config) {
   FILE *datafile = NULL;
   char line[TRAKR_SESSION_LENGTH] = {0};
   trakr_session_t *session = NULL;
@@ -132,4 +158,31 @@ void trakr_free(trakr_t *trakr) {
 
   free(trakr->sessions);
   free(trakr);
+}
+
+int trakr_session_active(const trakr_t *trakr) {
+  if (trakr->sessions[trakr->count - 1].end == -1) {
+    return 1;
+  }
+
+  return 0;
+}
+
+int trakr_session_new(trakr_session_t *session, const char *task, time_t start,
+                      time_t end) {
+  if (start == -1) {
+    if ((start = time(NULL)) == -1) {
+      return 0;
+    }
+  }
+
+  // TODO make this dynamic somehow
+  session->id = 1;
+  session->start = start;
+  session->end = end;
+
+  strncpy(session->task, task, TRAKR_TASK_LENGTH);
+  session->task[TRAKR_TASK_LENGTH - 1] = '\0';
+
+  return 1;
 }

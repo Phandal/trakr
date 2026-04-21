@@ -4,9 +4,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "session.h"
-#include "trakr.h"
-
 int cmd_is_help(const char *command) {
   if (strcmp(command, "help") == 0) {
     return 1;
@@ -23,7 +20,7 @@ int cmd_is_help(const char *command) {
   return 0;
 }
 
-int cmd_clock_in(int argc, char **argv, config_t *config) {
+int cmd_clock_in(int argc, char **argv, const trakr_t *app) {
   int ch;
   char task[TRAKR_TASK_LENGTH] = {0};
   time_t start = -1;
@@ -34,6 +31,7 @@ int cmd_clock_in(int argc, char **argv, config_t *config) {
       {0, 0, 0, 0},
   };
 
+  optind = 2;
   while ((ch = getopt_long(argc, argv, "+t:a:", longopts, NULL)) != -1) {
     switch (ch) {
     case 't':
@@ -41,13 +39,12 @@ int cmd_clock_in(int argc, char **argv, config_t *config) {
       task[TRAKR_TASK_LENGTH - 1] = '\0';
       break;
     case 'a':
-      if ((start = session_new_time(optarg)) == -1) {
+      if ((start = trakr_session_parse_time(optarg)) == -1) {
         trakr_log("unable to parse time '%s'\n", optarg);
         return 1;
       }
       break;
     default:
-      trakr_log("unknown error\n");
       return 1;
     }
   }
@@ -59,67 +56,63 @@ int cmd_clock_in(int argc, char **argv, config_t *config) {
     return 1;
   }
 
-  if (session_is_currently_active(config)) {
-    trakr_log("cannot clock into a new session when a session is already active\n");
+  if (trakr_session_active(app)) {
+    trakr_log(
+        "cannot clock into a new session when a session is already active\n");
     return 1;
   }
 
-  session_t *session = session_new(task, start, -1);
-  if (session == NULL) {
+  trakr_session_t session;
+  if (!trakr_session_new(&session, task, start, -1)) {
     trakr_log("could not create new session\n");
     return 1;
   }
 
-  /* printf("Clocked in at %s\n", session_strtime(session->start)); */
-  /* printf("  - %d | %s\n", session->id, session->task); */
-  char session_buf[TRAKR_SESSION_LENGTH] = {0};
-  if (session_str(session, session_buf) == -1) {
-    trakr_log("could not print session\n");
-  }
+  char startstr[TRAKR_TIME_LENGTH];
+  trakr_session_strtime(startstr, TRAKR_TIME_LENGTH, session.start);
+  printf("Clocked in at %s\n", startstr);
+  printf("  - %d | %s\n", session.id, session.task);
 
-  printf("Created new session: %s\n", session_buf);
-  
-  session_free(session);
   return 0;
 }
 
-int cmd_clock_out(int argc, char **argv, config_t *config) {
+int cmd_clock_out(int argc, char **argv, const trakr_t *app) {
   int ch;
-  time_t end_time = -1;
+  time_t end = -1;
 
   struct option longopts[] = {
       {"at", required_argument, NULL, 'a'},
       {0, 0, 0, 0},
   };
 
+  optind = 2;
   while ((ch = getopt_long(argc, argv, "+a:", longopts, NULL)) != -1) {
     switch (ch) {
     case 'a':
-      if ((end_time = session_new_time(optarg)) == -1) {
+      if ((end = trakr_session_parse_time(optarg)) == -1) {
         trakr_log("unable to parse time '%s'\n", optarg);
         return 1;
       }
       break;
     default:
-      trakr_log("unknown error\n");
       return 1;
     }
   }
   argc -= optind;
   argv += optind;
 
-  if (session_is_currently_active(config) == NULL) {
+  if (trakr_session_active(app)) {
     trakr_log("cannot clock out of session when none are active\n");
     return 1;
   }
 
   // TODO remove this when clocking out actual current task
-  if (end_time == -1) {
-    end_time = time(NULL);
+  if (end == -1) {
+    end = time(NULL);
   }
 
-  char end[TRAKR_TIME_LENGTH] = {0};
-  session_strtime(end_time, end);
-  printf("Clocked out at %s\n", end);
+  char endstr[TRAKR_TIME_LENGTH];
+  trakr_session_strtime(endstr, TRAKR_TIME_LENGTH, end);
+  printf("Clocked out at %s\n", endstr);
   return 0;
 }

@@ -26,8 +26,11 @@ int main(int argc, char **argv) {
     exit(EXIT_FAILURE);
   }
   command = argv[1];
-  argc--;
-  argv++;
+
+  if (cmd_is_help(command)) {
+    usage();
+    return 0;
+  }
 
   config_t *config = config_new();
   if (!config) {
@@ -37,28 +40,25 @@ int main(int argc, char **argv) {
 
   trakr_t *app = trakr_load(config);
   if (!app) {
-    trakr_log("corrupted data file\n");
+    trakr_log("could not load app state\n");
     return 1;
   }
 
-  printf("parsed %lu sessions\n", app->count);
-  for (unsigned int x = 0; x < app->count; ++x) {
-    const trakr_session_t *session = &app->sessions[x];
-    printf("id: %-5d task: %s\n", session->id, session->task);
-  }
+  // printf("parsed %lu sessions\n", app->count);
+  // for (unsigned int x = 0; x < app->count; ++x) {
+  //   const trakr_session_t *session = &app->sessions[x];
+  //   printf("id: %-5d task: %s\n", session->id, session->task);
+  // }
 
-  /* if (cmd_is_help(command)) { */
-  /*   usage(); */
-  /*   res = 0; */
-  /* } else if (strcmp(command, "in") == 0) { */
-  /*   res = cmd_clock_in(argc, argv, config); */
-  /* } else if (strcmp(command, "out") == 0) { */
-  /*   res = cmd_clock_out(argc, argv, config); */
-  /* } else { */
-  /*   trakr_log("unknown command '%s'\n", command); */
-  /*   usage(); */
-  /*   res = 1; */
-  /* } */
+  if (strcmp(command, "in") == 0) {
+    res = cmd_clock_in(argc, argv, app);
+  } else if (strcmp(command, "out") == 0) {
+    res = cmd_clock_out(argc, argv, app);
+  } else {
+    trakr_log("unknown command '%s'\n", command);
+    usage();
+    res = 1;
+  }
 
   config_free(config);
   trakr_free(app);

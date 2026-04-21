@@ -36,8 +36,18 @@ typedef struct {
 
 void trakr_log(const char *, ...);
 
-trakr_t *trakr_load(config_t *);
+trakr_t *trakr_load(const config_t *);
 
 void trakr_free(trakr_t *);
+
+int trakr_session_new(trakr_session_t *, const char *, time_t, time_t);
+
+time_t trakr_session_parse_date(const char *);
+
+time_t trakr_session_parse_time(const char *);
+
+int trakr_session_strtime(char *, size_t, time_t);
+
+int trakr_session_active(const trakr_t *);
 
 #endif // TRAKR_H

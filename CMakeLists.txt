@@ -6,8 +6,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_executable(trakr 
   src/main.c
-  # src/command.c
-  # src/session.c
+  src/command.c
   src/config.c
   src/trakr.c
 )
