@@ -161,7 +161,7 @@ void trakr_free(trakr_t *trakr) {
 }
 
 int trakr_session_active(const trakr_t *trakr) {
-  if (trakr->sessions[trakr->count - 1].end == -1) {
+  if (trakr->count > 0 && trakr->sessions[trakr->count - 1].end == -1) {
     return 1;
   }
 
