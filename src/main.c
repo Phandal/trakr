@@ -6,6 +6,7 @@
 #include "command.h"
 #include "config.h"
 #include "trakr.h"
+#include "version.h"
 
 void usage() {
   fprintf(stderr, "USAGE:\n  trakr <command> [<options>]\n\n");
@@ -15,6 +16,10 @@ void usage() {
   fprintf(stderr, "  %-15sReport time logged\n", "report");
   fprintf(stderr, "  %-15sUpdate a session\n", "update");
   fprintf(stderr, "  %-15sDelete a session\n", "delete");
+}
+
+void version() {
+  fprintf(stderr, "trakr %d.%d.%d\n", TRAKR_MAJOR, TRAKR_MINOR, TRAKR_PATCH);
 }
 
 int main(int argc, char **argv) {
@@ -29,6 +34,11 @@ int main(int argc, char **argv) {
 
   if (cmd_is_help(command)) {
     usage();
+    return 0;
+  }
+
+  if (cmd_is_version(command)) {
+    version();
     return 0;
   }
 

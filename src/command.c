@@ -20,6 +20,22 @@ int cmd_is_help(const char *command) {
   return 0;
 }
 
+int cmd_is_version(const char *command) {
+  if (strcmp(command, "version") == 0) {
+    return 1;
+  }
+
+  if (strcmp(command, "--version") == 0) {
+    return 1;
+  }
+
+  if (strcmp(command, "-v") == 0) {
+    return 1;
+  }
+
+  return 0;
+}
+
 int cmd_clock_in(int argc, char **argv, const trakr_t *app) {
   int ch;
   char task[TRAKR_TASK_LENGTH] = {0};

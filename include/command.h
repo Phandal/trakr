@@ -5,6 +5,8 @@
 
 int cmd_is_help(const char *);
 
+int cmd_is_version(const char *);
+
 int cmd_clock_in(int, char **, const trakr_t *);
 
 int cmd_clock_out(int, char **, const trakr_t *);
